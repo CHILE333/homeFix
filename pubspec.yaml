@@ -1,0 +1,62 @@
+name: homefix
+description: "A home service and repair app built with Flutter."
+
+# Prevent accidental publishing to pub.dev
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.7.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  url_launcher: ^6.3.0
+  google_maps_flutter: ^2.9.0 # Optional, for real maps in TrackYourOrderScreen
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/logo.png
+    - assets/images/homefix_banner.png
+    - assets/images/facebook_logo.png
+    - assets/images/instagram_logo.png
+    - assets/images/twitter_logo.png
+    - assets/images/whatsapp_logo.png
+    - assets/images/map_placeholder.png
+    - assets/services/plumbing.png
+    - assets/services/electricity.png
+    - assets/services/painting.png
+    - assets/services/toilet.png
+    - assets/services/gardening.png
+    - assets/services/windows.png
+    - assets/services/furniture.png
+    - assets/providers/alan_carter.png
+    - assets/providers/sophie_hayes.png
+    - assets/providers/david_lee.png
+    - assets/providers/brian_foster.png
+    - assets/providers/clara_evans.png
+    - assets/providers/ethan_moore.png
+    - assets/providers/fiona_clark.png
+    - assets/providers/george_adams.png
+    - assets/providers/hannah_brooks.png
+    - assets/providers/ian_wright.png
+    - assets/providers/julia_stone.png
+    - assets/providers/kevin_patel.png
+    - assets/providers/laura_green.png
+    - assets/providers/mark_taylor.png
+    - assets/providers/nina_scott.png
+    - assets/providers/oliver_king.png
+    - assets/providers/paula_reed.png
+    - assets/providers/quentin_hall.png
+    - assets/providers/rachel_ward.png
+    - assets/providers/samuel_cole.png
+    - assets/providers/tara_young.png
