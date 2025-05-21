@@ -1,20 +1,21 @@
 name: homefix
-description: "A home service and repair app built with Flutter."
-
-# Prevent accidental publishing to pub.dev
+description: A home service and repair app built with Flutter.
 publish_to: 'none'
-
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.7.2
-
+  sdk: '>=3.7.2 <4.0.0' 
 dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
   url_launcher: ^6.3.0
-  google_maps_flutter: ^2.9.0 # Optional, for real maps in TrackYourOrderScreen
+  google_maps_flutter: ^2.9.0
+  image_picker: ^1.1.2
+  get: ^4.7.2
+  supabase_flutter: ^2.8.0
+  http: ^1.2.2
+  shared_preferences: ^2.3.0
 
 dev_dependencies:
   flutter_test:
@@ -23,7 +24,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-
   assets:
     - assets/images/logo.png
     - assets/images/homefix_banner.png

@@ -1,5 +1,6 @@
+// splash_screen.dart
 import 'package:flutter/material.dart';
-import 'package:homefix/views/home.dart'; 
+import 'home.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -12,7 +13,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Navigate to Home after 2 seconds
+    // Navigate to HomeScreen after 2 seconds
     Future.delayed(const Duration(seconds: 2), () {
       Navigator.pushReplacement(
         context,
@@ -24,9 +25,18 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // hapa unabadili background unaweza ukaweka yoyote ila kwakuwa app hii inatumia white and blue color so battr iwe blue 
+      backgroundColor: Colors.blue, // Blue background as requested
       body: Center(
-        child: Image.asset('assets/images/logo.png'), // Your logo 
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset('assets/images/logo.png'), // Your logo
+            const SizedBox(height: 20),
+            const CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+          ],
+        ),
       ),
     );
   }
