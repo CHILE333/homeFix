@@ -1,9 +1,9 @@
-// lib/views/user_profile.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../controllers/auth_controller.dart';
+import '../views/auth/register_view.dart'; // Make sure this path is correct
 
 class UserProfileScreen extends StatelessWidget {
   const UserProfileScreen({super.key});
@@ -14,7 +14,7 @@ class UserProfileScreen extends StatelessWidget {
 
     if (!authController.isLoggedIn.value) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Get.off(() => const RegisterView());
+        Get.off(() => const RegisterView()); // Updated to RegistrationScreen
         Get.snackbar(
           'Registration Required',
           'Please register to access your profile',
@@ -81,6 +81,7 @@ class _UserProfileContentState extends State<_UserProfileContent> {
       await widget.authController.updateUserProfile(
         name: _nameController.text,
         phone: _phoneController.text,
+        image: _profileImage, // Added image parameter
       );
       
       setState(() {
@@ -97,7 +98,7 @@ class _UserProfileContentState extends State<_UserProfileContent> {
       setState(() => _isSaving = false);
       Get.snackbar(
         'Error',
-        'Failed to update profile',
+        'Failed to update profile: ${e.toString()}',
         snackPosition: SnackPosition.BOTTOM,
       );
     }
@@ -109,7 +110,7 @@ class _UserProfileContentState extends State<_UserProfileContent> {
       appBar: AppBar(
         title: const Text('My Profile'),
         actions: [
-          IconButton(
+          if (!_isEditing) IconButton(
             icon: const Icon(Icons.edit),
             onPressed: () => setState(() => _isEditing = true),
           ),
@@ -122,19 +123,25 @@ class _UserProfileContentState extends State<_UserProfileContent> {
             key: _formKey,
             child: Column(
               children: [
-                CircleAvatar(
-                  radius: 50,
-                  backgroundImage: _profileImage != null 
-                      ? FileImage(_profileImage!) 
-                      : null,
-                  child: _profileImage == null 
-                      ? const Icon(Icons.person, size: 50)
-                      : null,
+                GestureDetector(
+                  onTap: _isEditing ? _pickImage : null,
+                  child: CircleAvatar(
+                    radius: 50,
+                    backgroundImage: _profileImage != null 
+                        ? FileImage(_profileImage!) 
+                        : (widget.authController.currentUser.value?['photoUrl'] != null
+                            ? NetworkImage(widget.authController.currentUser.value!['photoUrl']) as ImageProvider
+                            : null),
+                    child: _profileImage == null && widget.authController.currentUser.value?['photoUrl'] == null
+                        ? const Icon(Icons.person, size: 50)
+                        : null,
+                  ),
                 ),
                 if (_isEditing) TextButton(
                   onPressed: _pickImage,
                   child: const Text('Change Photo'),
                 ),
+                const SizedBox(height: 20),
                 TextFormField(
                   controller: _nameController,
                   decoration: const InputDecoration(labelText: 'Full Name'),
@@ -149,7 +156,7 @@ class _UserProfileContentState extends State<_UserProfileContent> {
                 TextFormField(
                   controller: _emailController,
                   decoration: const InputDecoration(labelText: 'Email'),
-                  enabled: false, // Email shouldn't be editable
+                  enabled: false,
                 ),
                 TextFormField(
                   controller: _phoneController,
@@ -159,6 +166,9 @@ class _UserProfileContentState extends State<_UserProfileContent> {
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your phone number';
+                    }
+                    if (!RegExp(r'^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$').hasMatch(value)) {
+                      return 'Enter a valid phone number';
                     }
                     return null;
                   },
@@ -172,7 +182,14 @@ class _UserProfileContentState extends State<_UserProfileContent> {
                         : const Text('Save Changes'),
                   ),
                   TextButton(
-                    onPressed: () => setState(() => _isEditing = false),
+                    onPressed: () => setState(() {
+                      _isEditing = false;
+                      // Reset changes if cancelled
+                      final user = widget.authController.currentUser.value;
+                      _nameController.text = user?['full_name'] ?? '';
+                      _phoneController.text = user?['phone'] ?? '';
+                      _profileImage = null;
+                    }),
                     child: const Text('Cancel'),
                   ),
                 ],

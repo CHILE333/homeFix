@@ -1,15 +1,16 @@
+// lib/views/auth/login_view.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/auth_controller.dart';
 
 class LoginView extends StatelessWidget {
-  LoginView({super.key});
-
-  final _formKey = GlobalKey<FormState>();
-  final _authController = Get.find<AuthController>();
+  const LoginView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final _formKey = GlobalKey<FormState>();
+    final authController = Get.find<AuthController>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Login'),
@@ -22,9 +23,8 @@ class LoginView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Email Field
               TextFormField(
-                controller: _authController.emailController,
+                controller: authController.emailController,
                 decoration: const InputDecoration(
                   labelText: 'Email',
                   prefixIcon: Icon(Icons.email),
@@ -36,10 +36,8 @@ class LoginView extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 16),
-
-              // Password Field
               TextFormField(
-                controller: _authController.passwordController,
+                controller: authController.passwordController,
                 decoration: const InputDecoration(
                   labelText: 'Password',
                   prefixIcon: Icon(Icons.lock),
@@ -52,31 +50,25 @@ class LoginView extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 24),
-
-              // Error Message
-              Obx(() => _authController.errorMessage.value.isNotEmpty
+              Obx(() => authController.errorMessage.value.isNotEmpty
                   ? Text(
-                      _authController.errorMessage.value,
+                      authController.errorMessage.value,
                       style: const TextStyle(color: Colors.red),
                     )
                   : const SizedBox()),
-
-              // Login Button
               Obx(() => ElevatedButton(
-                onPressed: _authController.isLoading.value
+                onPressed: authController.isLoading.value
                     ? null
                     : () async {
                         if (_formKey.currentState!.validate()) {
-                          await _authController.login();
+                          await authController.login();
                         }
                       },
-                child: _authController.isLoading.value
+                child: authController.isLoading.value
                     ? const CircularProgressIndicator()
                     : const Text('LOGIN'),
               )),
               const SizedBox(height: 16),
-
-              // Register Link
               TextButton(
                 onPressed: () => Get.offNamed('/register'),
                 child: const Text('Don\'t have an account? Register'),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:io';
 
 class AuthController extends GetxController {
   // Form Controllers
@@ -128,6 +129,62 @@ class AuthController extends GetxController {
       Get.offAllNamed('/login');
     } catch (e) {
       errorMessage.value = e.toString();
+    }
+  }
+
+  Future<void> updateUserProfile({
+    required String name,
+    required String phone,
+    File? image,
+  }) async {
+    try {
+      isLoading.value = true;
+      errorMessage.value = '';
+
+      // Get current user
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user == null) throw Exception('User not authenticated');
+
+      // Upload image if provided
+      String? imageUrl;
+      if (image != null) {
+        final fileExt = image.path.split('.').last;
+        final fileName = '${user.id}.$fileExt';
+        final filePath = 'profile_images/$fileName';
+
+        await Supabase.instance.client.storage
+            .from('profile_pictures')
+            .upload(filePath, image);
+
+        // Get public URL
+        imageUrl = Supabase.instance.client.storage
+            .from('profile_pictures')
+            .getPublicUrl(filePath);
+      }
+
+      // Update user data
+      final updates = {
+        'full_name': name,
+        'phone': phone,
+        'updated_at': DateTime.now().toIso8601String(),
+        if (imageUrl != null) 'photoUrl': imageUrl,
+      };
+
+      await Supabase.instance.client
+          .from('users')
+          .update(updates)
+          .eq('id', user.id);
+
+      // Refresh user data
+      await fetchUserData(user.id);
+    } on AuthException catch (e) {
+      errorMessage.value = e.message;
+    } on StorageException catch (e) {
+      errorMessage.value = 'Failed to upload image: ${e.message}';
+    } catch (e) {
+      errorMessage.value = 'Failed to update profile: ${e.toString()}';
+    } finally {
+      isLoading.value = false;
     }
   }
 
