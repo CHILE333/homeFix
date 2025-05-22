@@ -4,8 +4,8 @@ import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'controllers/auth_controller.dart';
 import 'views/splash.dart';
-import 'views/auth/login_view.dart';
-import 'views/auth/register_view.dart';
+import 'views/auth/login_screen.dart';
+import 'views/auth/register_screen.dart';
 import 'views/home.dart';
 
 void main() async {
@@ -37,8 +37,8 @@ class MyApp extends StatelessWidget {
       initialRoute: '/splash',
       getPages: [
         GetPage(name: '/splash', page: () => const SplashScreen()),
-        GetPage(name: '/login', page: () => const LoginView()),
-        GetPage(name: '/register', page: () => const RegisterView()),
+        GetPage(name: '/login', page: () => const LoginScreen()),
+        GetPage(name: '/register', page: () => const RegisterScreen()),
         GetPage(name: '/home', page: () => const HomeScreen()),
       ],
     );

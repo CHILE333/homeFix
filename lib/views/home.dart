@@ -5,6 +5,8 @@ import 'register_service.dart';
 import 'track_your_order.dart';
 import 'make_payment.dart';
 import 'user_profile.dart';
+import 'notification.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -43,18 +45,19 @@ class HomeScreen extends StatelessWidget {
                   'assets/images/logo.png',
                   height: 40,
                   width: 40,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.home_repair_service,
-                      size: 24,
-                      color: Colors.blueAccent,
-                    ),
-                  ),
+                  errorBuilder:
+                      (context, error, stackTrace) => Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.home_repair_service,
+                          size: 24,
+                          color: Colors.blueAccent,
+                        ),
+                      ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -121,8 +124,11 @@ class HomeScreen extends StatelessWidget {
                   ],
                 ),
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Notifications coming soon!')),
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const NotificationsScreen(),
+                    ),
                   );
                 },
                 tooltip: 'Notifications',
@@ -135,7 +141,7 @@ class HomeScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const UserProfileScreen(),
+                      builder: (context) => const ProfileScreen(),
                     ),
                   );
                 },
@@ -145,10 +151,7 @@ class HomeScreen extends StatelessWidget {
                   builder: (context, double value, child) {
                     return Transform.scale(
                       scale: 0.8 + 0.2 * value,
-                      child: Opacity(
-                        opacity: value,
-                        child: child,
-                      ),
+                      child: Opacity(opacity: value, child: child),
                     );
                   },
                   child: Container(
@@ -202,11 +205,12 @@ class HomeScreen extends StatelessWidget {
                       'assets/images/logo.png',
                       height: 60,
                       width: 60,
-                      errorBuilder: (context, error, stackTrace) => const Icon(
-                        Icons.home_repair_service,
-                        size: 60,
-                        color: Colors.white,
-                      ),
+                      errorBuilder:
+                          (context, error, stackTrace) => const Icon(
+                            Icons.home_repair_service,
+                            size: 60,
+                            color: Colors.white,
+                          ),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -223,25 +227,37 @@ class HomeScreen extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.home, color: Colors.blueAccent),
-              title: const Text('Home', style: TextStyle(fontWeight: FontWeight.w600)),
+              title: const Text(
+                'Home',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
               onTap: () => Navigator.pop(context),
             ),
             ListTile(
-              leading: const Icon(Icons.account_circle, color: Colors.blueAccent),
-              title: const Text('Profile', style: TextStyle(fontWeight: FontWeight.w600)),
+              leading: const Icon(
+                Icons.account_circle,
+                color: Colors.blueAccent,
+              ),
+              title: const Text(
+                'Profile',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const UserProfileScreen(),
+                    builder: (context) => const ProfileScreen(),
                   ),
                 );
               },
             ),
             ListTile(
               leading: const Icon(Icons.info, color: Colors.blueAccent),
-              title: const Text('About', style: TextStyle(fontWeight: FontWeight.w600)),
+              title: const Text(
+                'About',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -251,7 +267,10 @@ class HomeScreen extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.support, color: Colors.blueAccent),
-              title: const Text('Support', style: TextStyle(fontWeight: FontWeight.w600)),
+              title: const Text(
+                'Support',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -294,10 +313,7 @@ class HomeScreen extends StatelessWidget {
                     SizedBox(height: 5),
                     Text(
                       'What service do you need today?',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.blueGrey,
-                      ),
+                      style: TextStyle(fontSize: 16, color: Colors.blueGrey),
                     ),
                   ],
                 ),
@@ -319,8 +335,14 @@ class HomeScreen extends StatelessWidget {
                   decoration: InputDecoration(
                     hintText: 'Search for services...',
                     border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
-                    prefixIcon: const Icon(Icons.search, color: Colors.blueAccent),
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 18,
+                      horizontal: 20,
+                    ),
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      color: Colors.blueAccent,
+                    ),
                   ),
                   onChanged: (value) {
                     // Implement search functionality here
@@ -353,11 +375,48 @@ class HomeScreen extends StatelessWidget {
                     context,
                     icon: Icons.app_registration,
                     label: 'Register Service',
-                    onPressed: () {
+                    // ...existing code...
+                    // Add debug print in the Register Service card
+                    onPressed: () async {
+                      final prefs = await SharedPreferences.getInstance();
+                      final userId = prefs.getInt('user_id') ?? 0;
+                      final isProvider = prefs.getBool('is_provider') ?? false;
+
+                      // Debug prints
+                      print('Debug - userId: $userId');
+                      print('Debug - isProvider: $isProvider');
+                      print(
+                        'Debug - All prefs: ${prefs.getKeys().map((k) => '$k: ${prefs.get(k)}').join(', ')}',
+                      );
+
+                      if (!isProvider || userId == 0) {
+                        showDialog(
+                          context: context,
+                          builder:
+                              (context) => AlertDialog(
+                                title: Text('Error'),
+                                content: Text(
+                                  'Please log in as a service provider first',
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: Text('OK'),
+                                  ),
+                                ],
+                              ),
+                        );
+                        return;
+                      }
+
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const RegisterServiceScreen(),
+                          builder:
+                              (context) => ServiceRegistrationForm(
+                                providerId: userId,
+                                baseUrl: 'http://localhost:8000',
+                              ),
                         ),
                       );
                     },
@@ -383,11 +442,12 @@ class HomeScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const MakePaymentScreen(
-                            serviceName: 'Sample Service',
-                            providerName: 'Sample Provider',
-                            amount: 50.0,
-                          ),
+                          builder:
+                              (context) => const MakePaymentScreen(
+                                serviceName: 'Sample Service',
+                                providerName: 'Sample Provider',
+                                amount: 50.0,
+                              ),
                         ),
                       );
                     },
@@ -425,7 +485,9 @@ class HomeScreen extends StatelessWidget {
                           'assets/images/facebook_logo.png',
                           'Facebook',
                           () => ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Facebook page coming soon!')),
+                            const SnackBar(
+                              content: Text('Facebook page coming soon!'),
+                            ),
                           ),
                         ),
                         const SizedBox(width: 20),
@@ -433,7 +495,9 @@ class HomeScreen extends StatelessWidget {
                           'assets/images/instagram_logo.png',
                           'Instagram',
                           () => ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Instagram page coming soon!')),
+                            const SnackBar(
+                              content: Text('Instagram page coming soon!'),
+                            ),
                           ),
                         ),
                         const SizedBox(width: 20),
@@ -441,7 +505,9 @@ class HomeScreen extends StatelessWidget {
                           'assets/images/twitter_logo.png',
                           'Twitter',
                           () => ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Twitter page coming soon!')),
+                            const SnackBar(
+                              content: Text('Twitter page coming soon!'),
+                            ),
                           ),
                         ),
                         const SizedBox(width: 20),
@@ -449,7 +515,9 @@ class HomeScreen extends StatelessWidget {
                           'assets/images/whatsapp_logo.png',
                           'WhatsApp',
                           () => ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('WhatsApp coming soon!')),
+                            const SnackBar(
+                              content: Text('WhatsApp coming soon!'),
+                            ),
                           ),
                         ),
                       ],
@@ -473,9 +541,7 @@ class HomeScreen extends StatelessWidget {
   }) {
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: onPressed,
@@ -497,10 +563,7 @@ class HomeScreen extends StatelessWidget {
                 builder: (context, double value, child) {
                   return Transform.scale(
                     scale: 0.8 + 0.2 * value,
-                    child: Opacity(
-                      opacity: value,
-                      child: child,
-                    ),
+                    child: Opacity(opacity: value, child: child),
                   );
                 },
                 child: Container(
@@ -536,7 +599,11 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSocialButton(String imagePath, String platform, VoidCallback onTap) {
+  Widget _buildSocialButton(
+    String imagePath,
+    String platform,
+    VoidCallback onTap,
+  ) {
     return GestureDetector(
       onTap: onTap,
       child: Tooltip(
@@ -559,10 +626,9 @@ class HomeScreen extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: Image.asset(
               imagePath,
-              errorBuilder: (context, error, stackTrace) => const Icon(
-                Icons.error,
-                color: Colors.blueAccent,
-              ),
+              errorBuilder:
+                  (context, error, stackTrace) =>
+                      const Icon(Icons.error, color: Colors.blueAccent),
             ),
           ),
         ),
