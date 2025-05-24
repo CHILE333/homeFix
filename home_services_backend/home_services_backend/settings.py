@@ -109,3 +109,5 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+ALLOWED_HOSTS = ['192.168.1.255', 'localhost', '127.0.0.1', '10.42.0.255', '192.168.1.101']

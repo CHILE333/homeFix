@@ -3,6 +3,7 @@ from django.views.decorators.csrf import csrf_exempt
 from services.models import Service
 from accounts.models import User
 import json
+from orders.models import Order
 
 @csrf_exempt
 def create_service(request):
@@ -161,3 +162,158 @@ def get_service_detail(request, service_id):
                 'success': False, 
                 'message': f'Error fetching service details: {str(e)}'
             }, status=500)
+
+
+@csrf_exempt
+def book_service(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            customer_id = data.get('customer_id')
+            service_id = data.get('service_id')
+            scheduled_date = data.get('scheduled_date')
+            scheduled_time = data.get('scheduled_time')
+            notes = data.get('notes', '')
+            
+            # Create order
+            customer = User.objects.get(id=customer_id)
+            service = Service.objects.get(id=service_id)
+            
+            order = Order.objects.create(
+                customer=customer,
+                service=service,
+                scheduled_date=scheduled_date,
+                notes=notes
+            )
+            
+            # Create notification for the service provider
+            from notifications.views import create_notification
+            provider_notification = create_notification(
+                user_id=service.provider.id,
+                title='New Service Booking',
+                message=f'You have a new booking for {service.title} on {scheduled_date} at {scheduled_time}',
+                notification_type='new_order',
+                related_order_id=order.id
+            )
+            
+            # Create notification for the customer as well
+            customer_notification = create_notification(
+                user_id=customer_id,
+                title='Booking Confirmed',
+                message=f'Your booking for {service.title} has been confirmed for {scheduled_date} at {scheduled_time}',
+                notification_type='order_status',
+                related_order_id=order.id
+            )
+            
+            return JsonResponse({
+                'success': True, 
+                'order_id': order.id,
+                'message': 'Service booked successfully'
+            })
+            
+        except User.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'User not found'})
+        except Service.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Service not found'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+
+
+@csrf_exempt
+def update_service(request, service_id):
+    if request.method == 'PUT':
+        try:
+            data = json.loads(request.body)
+            provider_id = data.get('provider_id')
+            
+            # Get the service and verify ownership
+            service = Service.objects.get(id=service_id)
+            if service.provider.id != provider_id:
+                return JsonResponse({'success': False, 'message': 'Not authorized to update this service'}, status=403)
+            
+            # Update the service fields
+            if 'title' in data:
+                service.title = data['title']
+            if 'description' in data:
+                service.description = data['description']
+            if 'category' in data:
+                service.category = data['category']
+            if 'price' in data:
+                service.price = data['price']
+            if 'is_active' in data:
+                service.is_active = data['is_active']
+                
+            service.save()
+            
+            return JsonResponse({'success': True, 'message': 'Service updated successfully'})
+            
+        except Service.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Service not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+@csrf_exempt
+def delete_service(request, service_id):
+    if request.method == 'DELETE':
+        try:
+            data = json.loads(request.body)
+            provider_id = data.get('provider_id')
+            
+            # Get the service and verify ownership
+            service = Service.objects.get(id=service_id)
+            if service.provider.id != provider_id:
+                return JsonResponse({'success': False, 'message': 'Not authorized to delete this service'}, status=403)
+            
+            # Check if this service has active orders
+            active_orders = Order.objects.filter(service=service, status__in=['pending', 'confirmed']).exists()
+            if active_orders:
+                return JsonResponse({
+                    'success': False, 
+                    'message': 'Cannot delete service with active orders'
+                }, status=400)
+                
+            service.delete()
+            return JsonResponse({'success': True, 'message': 'Service deleted successfully'})
+            
+        except Service.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Service not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+
+@csrf_exempt
+def provider_services(request, provider_id):
+    if request.method == 'GET':
+        try:
+            # Verify the provider exists
+            provider = User.objects.get(id=provider_id, is_provider=True)
+            
+            # Get all services provided by this user
+            services = Service.objects.filter(provider=provider)
+            
+            data = []
+            for service in services:
+                # Get the count of active orders for this service
+                active_orders = Order.objects.filter(
+                    service=service, 
+                    status__in=['pending', 'confirmed']
+                ).count()
+                
+                data.append({
+                    'id': service.id,
+                    'title': service.title,
+                    'description': service.description,
+                    'category': service.category,
+                    'price': str(service.price),
+                    'rating': service.rating,
+                    'is_active': service.is_active,
+                    'created_at': service.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                    'active_orders': active_orders
+                })
+                
+            return JsonResponse({'success': True, 'services': data})
+            
+        except User.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Provider not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
