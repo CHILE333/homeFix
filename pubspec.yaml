@@ -1,27 +1,30 @@
 name: homefix
 description: A home service and repair app built with Flutter.
-publish_to: 'none'
 version: 1.0.0+1
+publish_to: none
 
 environment:
-  sdk: '>=3.7.2 <4.0.0' 
+  sdk: '>=3.7.2 <4.0.0'
+
 dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
-  url_launcher: ^6.3.0
-  google_maps_flutter: ^2.9.0
-  image_picker: ^1.1.2
+  flutter_animate: ^4.5.2
   get: ^4.7.2
-  supabase_flutter: ^2.8.0
+  google_fonts: ^6.2.1
+  google_maps_flutter: ^2.9.0
   http: ^1.2.2
-  shared_preferences: ^2.3.0
+  image_picker: ^1.1.2
   intl: ^0.20.2
+  shared_preferences: ^2.5.3
+  supabase_flutter: ^2.8.0
+  url_launcher: ^6.3.0
 
 dev_dependencies:
+  flutter_lints: ^5.0.0
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
 
 flutter:
   uses-material-design: true
@@ -41,10 +44,9 @@ flutter:
     - assets/services/windows.png
     - assets/services/furniture.png
     - assets/providers/alan_carter.png
-    - assets/providers/sophie_hayes.png
-    - assets/providers/david_lee.png
     - assets/providers/brian_foster.png
     - assets/providers/clara_evans.png
+    - assets/providers/david_lee.png
     - assets/providers/ethan_moore.png
     - assets/providers/fiona_clark.png
     - assets/providers/george_adams.png
@@ -53,11 +55,18 @@ flutter:
     - assets/providers/julia_stone.png
     - assets/providers/kevin_patel.png
     - assets/providers/laura_green.png
+    - assets/images/fire_extinguisher.jpeg
     - assets/providers/mark_taylor.png
     - assets/providers/nina_scott.png
     - assets/providers/oliver_king.png
     - assets/providers/paula_reed.png
+    - assets/images/water_heater.jpeg
+    - assets/images/smoke_detector.jpeg
+    - assets/images/frozen_pipes.jpeg
     - assets/providers/quentin_hall.png
+    - assets/images/gutters.jpeg
+    - assets/images/ac_filter.jpeg
     - assets/providers/rachel_ward.png
     - assets/providers/samuel_cole.png
+    - assets/providers/sophie_hayes.png
     - assets/providers/tara_young.png

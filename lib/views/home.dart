@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'home_service.dart';
 import 'register_service.dart';
 import 'track_your_order.dart';
-import 'make_payment.dart';
+import 'home_maintenance_tips.dart'; // New import
 import 'user_profile.dart';
 import 'notification.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -126,8 +126,14 @@ class HomeScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const NotificationsScreen(),
+                    PageRouteBuilder(
+                      pageBuilder: (_, __, ___) => const NotificationsScreen(),
+                      transitionsBuilder: (_, animation, __, child) {
+                        return FadeTransition(
+                          opacity: animation,
+                          child: child,
+                        );
+                      },
                     ),
                   );
                 },
@@ -140,8 +146,17 @@ class HomeScreen extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const ProfileScreen(),
+                    PageRouteBuilder(
+                      pageBuilder: (_, __, ___) => const ProfileScreen(),
+                      transitionsBuilder: (_, animation, __, child) {
+                        return SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(1, 0),
+                            end: Offset.zero,
+                          ).animate(animation),
+                          child: child,
+                        );
+                      },
                     ),
                   );
                 },
@@ -246,8 +261,17 @@ class HomeScreen extends StatelessWidget {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const ProfileScreen(),
+                  PageRouteBuilder(
+                    pageBuilder: (_, __, ___) => const ProfileScreen(),
+                    transitionsBuilder: (_, animation, __, child) {
+                      return SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(1, 0),
+                          end: Offset.zero,
+                        ).animate(animation),
+                        child: child,
+                      );
+                    },
                   ),
                 );
               },
@@ -365,8 +389,14 @@ class HomeScreen extends StatelessWidget {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => const HomeServiceScreen(),
+                        PageRouteBuilder(
+                          pageBuilder: (_, __, ___) => const HomeServiceScreen(),
+                          transitionsBuilder: (_, animation, __, child) {
+                            return FadeTransition(
+                              opacity: animation,
+                              child: child,
+                            );
+                          },
                         ),
                       );
                     },
@@ -375,36 +405,26 @@ class HomeScreen extends StatelessWidget {
                     context,
                     icon: Icons.app_registration,
                     label: 'Register Service',
-                    // ...existing code...
-                    // Add debug print in the Register Service card
                     onPressed: () async {
                       final prefs = await SharedPreferences.getInstance();
                       final userId = prefs.getInt('user_id') ?? 0;
                       final isProvider = prefs.getBool('is_provider') ?? false;
 
-                      // Debug prints
-                      print('Debug - userId: $userId');
-                      print('Debug - isProvider: $isProvider');
-                      print(
-                        'Debug - All prefs: ${prefs.getKeys().map((k) => '$k: ${prefs.get(k)}').join(', ')}',
-                      );
-
                       if (!isProvider || userId == 0) {
                         showDialog(
                           context: context,
-                          builder:
-                              (context) => AlertDialog(
-                                title: Text('Error'),
-                                content: Text(
-                                  'Please log in as a service provider first',
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: Text('OK'),
-                                  ),
-                                ],
+                          builder: (context) => AlertDialog(
+                            title: const Text('Error'),
+                            content: const Text(
+                              'Please log in as a service provider first',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('OK'),
                               ),
+                            ],
+                          ),
                         );
                         return;
                       }
@@ -412,11 +432,10 @@ class HomeScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder:
-                              (context) => ServiceRegistrationForm(
-                                providerId: userId,
-                                baseUrl: 'http://localhost:8000',
-                              ),
+                          builder: (context) => ServiceRegistrationForm(
+                            providerId: userId,
+                            baseUrl: 'http://localhost:8000',
+                          ),
                         ),
                       );
                     },
@@ -428,26 +447,42 @@ class HomeScreen extends StatelessWidget {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => const TrackYourOrderScreen(),
+                        PageRouteBuilder(
+                          pageBuilder: (_, __, ___) => const TrackYourOrderScreen(),
+                          transitionsBuilder: (_, animation, __, child) {
+                            return SlideTransition(
+                              position: Tween<Offset>(
+                                begin: const Offset(0, 1),
+                                end: Offset.zero,
+                              ).animate(animation),
+                              child: child,
+                            );
+                          },
                         ),
                       );
                     },
                   ),
                   _buildServiceCard(
                     context,
-                    icon: Icons.payment,
-                    label: 'Make Payment',
+                    icon: Icons.handyman,
+                    label: 'Maintenance Tips',
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder:
-                              (context) => const MakePaymentScreen(
-                                serviceName: 'Sample Service',
-                                providerName: 'Sample Provider',
-                                amount: 50.0,
-                              ),
+                        PageRouteBuilder(
+                          pageBuilder: (_, __, ___) => const HomeMaintenanceTips(),
+                          transitionsBuilder: (_, animation, __, child) {
+                            return ScaleTransition(
+                              scale: Tween<double>(
+                                begin: 0.5,
+                                end: 1.0,
+                              ).animate(CurvedAnimation(
+                                parent: animation,
+                                curve: Curves.fastOutSlowIn,
+                              )),
+                              child: child,
+                            );
+                          },
                         ),
                       );
                     },
@@ -626,9 +661,8 @@ class HomeScreen extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: Image.asset(
               imagePath,
-              errorBuilder:
-                  (context, error, stackTrace) =>
-                      const Icon(Icons.error, color: Colors.blueAccent),
+              errorBuilder: (context, error, stackTrace) =>
+                  const Icon(Icons.error, color: Colors.blueAccent),
             ),
           ),
         ),
